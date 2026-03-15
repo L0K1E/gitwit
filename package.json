@@ -1,0 +1,46 @@
+{
+  "name": "gitwit",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "3.0.43",
+    "@ai-sdk/openai": "3.0.41",
+    "@ai-sdk/provider": "3.0.8",
+    "@ai-sdk/provider-utils": "4.0.19",
+    "@ai-sdk/react": "3.0.118",
+    "@assistant-ui/react": "^0.12.17",
+    "@assistant-ui/react-markdown": "^0.12.5",
+    "@langchain/community": "^1.1.23",
+    "@langchain/core": "^1.1.32",
+    "@langchain/google-genai": "^2.1.25",
+    "@langchain/openai": "^1.2.13",
+    "@langchain/textsplitters": "^1.0.1",
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.99.1",
+    "ai": "6.0.116",
+    "lucide-react": "^0.577.0",
+    "next": "16.1.6",
+    "octokit": "^5.0.5",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^11.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "supabase": "^2.78.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
