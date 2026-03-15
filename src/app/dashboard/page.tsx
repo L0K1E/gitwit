@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
+import { useRouter } from "next/navigation";
 import { Github, LogOut, PanelLeftClose, PanelLeftOpen, Terminal, Send, Loader2 } from "lucide-react";
 import { AddRepoModal } from "@/components/add-repo-modal";
 import { BrainStatus } from "@/components/brain-status";
+import { createClient } from "@/utils/supabase/client";
 
 interface Repository {
   id: string;
@@ -13,11 +15,13 @@ interface Repository {
 }
 
 export default function Dashboard() {
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [repos, setRepos] = useState<Repository[]>([]);
   const [selectedRepoId, setSelectedRepoId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [isLoadingRepos, setIsLoadingRepos] = useState(true);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Fetch repos on mount
   useEffect(() => {
@@ -62,6 +66,13 @@ export default function Dashboard() {
 
   const handleRepoAdded = () => {
     fetchRepositories();
+  };
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
   };
 
   // Use a more generic type to bypass the version-mismatch error
@@ -140,9 +151,13 @@ export default function Dashboard() {
               <BrainStatus repoUrl={selectedRepo.repo_url} />
             </div>
           )}
-          <button className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors w-full p-2">
-            <LogOut className="w-4 h-4" />
-            Sign Out
+          <button
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors w-full p-2 disabled:opacity-50"
+          >
+            {isSigningOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+            {isSigningOut ? "Signing out..." : "Sign Out"}
           </button>
         </div>
       </aside>
