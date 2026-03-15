@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { getIngestionStatus } from "@/lib/ingestion";
 
 interface BrainStatusProps {
   repoUrl?: string;
@@ -12,50 +11,50 @@ type HealthStatus = "idle" | "healthy" | "indexing" | "error";
 
 export function BrainStatus({ repoUrl }: BrainStatusProps) {
   const [status, setStatus] = useState<HealthStatus>("idle");
-  const [isPolling, setIsPolling] = useState(false);
 
-  useEffect(() => {
+  const checkStatus = useCallback(async () => {
     if (!repoUrl) {
       setStatus("idle");
-      setIsPolling(false);
       return;
     }
 
-    // Check initial status
-    const checkStatus = () => {
-      const ingestionStatus = getIngestionStatus(repoUrl);
+    try {
+      const response = await fetch(`/api/repos/status?repoUrl=${encodeURIComponent(repoUrl)}`);
+      if (!response.ok) throw new Error("Failed to fetch status");
       
-      if (ingestionStatus.status === "completed") {
+      const data = await response.json();
+      const ingestionStatus = data.status?.status;
+
+      if (ingestionStatus === "completed") {
         setStatus("healthy");
-        setIsPolling(false);
       } else if (
-        ingestionStatus.status === "fetching" ||
-        ingestionStatus.status === "chunking" ||
-        ingestionStatus.status === "embedding"
+        ingestionStatus === "fetching" ||
+        ingestionStatus === "chunking" ||
+        ingestionStatus === "embedding"
       ) {
         setStatus("indexing");
-        setIsPolling(true);
-      } else if (ingestionStatus.status === "error") {
+      } else if (ingestionStatus === "error") {
         setStatus("error");
-        setIsPolling(false);
       } else {
         setStatus("idle");
-        setIsPolling(false);
       }
-    };
+    } catch {
+      setStatus("idle");
+    }
+  }, [repoUrl]);
 
+  useEffect(() => {
     checkStatus();
 
-    // Set up polling interval if indexing
-    let pollInterval: NodeJS.Timeout | null = null;
-    if (isPolling || status === "indexing") {
-      pollInterval = setInterval(checkStatus, 2000);
-    }
+    // Poll every 2 seconds if indexing
+    const pollInterval = setInterval(() => {
+      if (status === "indexing") {
+        checkStatus();
+      }
+    }, 2000);
 
-    return () => {
-      if (pollInterval) clearInterval(pollInterval);
-    };
-  }, [repoUrl, isPolling, status]);
+    return () => clearInterval(pollInterval);
+  }, [checkStatus, status]);
 
   const getStatusColor = (): string => {
     switch (status) {
